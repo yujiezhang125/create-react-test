@@ -10,7 +10,9 @@ class Home extends React.Component {
         </header>
  
         <main>
-          <Link to="/login">Log in</Link>
+          <div><Link to="/mapdisplay">  Lost  </Link></div>
+          <div><Link to="/login">  Find  </Link></div>
+          
         </main>
       </div>
     );
