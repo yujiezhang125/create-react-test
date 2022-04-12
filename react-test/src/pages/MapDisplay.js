@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 
 import mapboxgl from 'mapbox-gl'; 
+import FilterForm from './FilterForm';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoieXVqaWV6aGFuZzEyNSIsImEiOiJja3Ztb2I4bDMzNHV4MnVxZnFhNG5sZDIyIn0.8MKp_jRj8QSo5B_uMmbMZg';
 
@@ -139,6 +140,7 @@ export default function App() {
             Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
           </div>
           <div ref={mapContainer} className="map-container" />
+          <FilterForm />
         </div>
       );
 }
