@@ -38,6 +38,7 @@ export default function App() {
                 'coordinates': [-118.28950976870416,  34.02067638715009]
                 },
                 'properties': {
+                  'color': 'red',
                   'description': 'Olin Hall description',
                   'icon': 'marker'
                 }
@@ -49,15 +50,31 @@ export default function App() {
                   'coordinates': [-118.28290498660579,  34.02176003995943]
                   },
                   'properties': {
+                    'color': 'blue',
                     'description': 'Leavey Library description',
                     'icon': 'marker'
                   }
                 }
             ]
+          }
+
+          const geojson_filtered = {
+            'type': 'FeatureCollection',
+            'features': []
+          }
+          for (let i = 0; i < geojson.features.length; i++) {
+            const obj = geojson.features[i];
+            const color = geojson.features[i].properties.color;
+            console.log(color);
+            if (color == 'red') {
+              geojson_filtered.features.push(obj);
             }
+          }
+          
+
           map.current.addSource('points', {
             'type': 'geojson',
-            'data': geojson
+            'data': geojson_filtered
             });
           
           map.current.addLayer({
