@@ -12,6 +12,10 @@ export default function App() {
     const [lng, setLng] = useState(-118.2868);
     const [lat, setLat] = useState(34.0227);
     const [zoom, setZoom] = useState(14.7);
+    const [itemColor, setItemColor] = useState();
+    const [itemType, setItemType] = useState();
+    const [itemDate, setItemDate] = useState();
+    const [itemDescription, setItemDescription] = useState();
 
     
 
@@ -38,8 +42,11 @@ export default function App() {
                 'coordinates': [-118.28950976870416,  34.02067638715009]
                 },
                 'properties': {
-                  'color': 'red',
-                  'description': 'Olin Hall description',
+                  'id': 101,
+                  'type': 'Key',
+                  'color': 'Red',
+                  'date': '2022.3.15',
+                  'description': 'A red key was found at Olin Hall, classroom 134',
                   'icon': 'marker'
                 }
               }, 
@@ -50,31 +57,35 @@ export default function App() {
                   'coordinates': [-118.28290498660579,  34.02176003995943]
                   },
                   'properties': {
-                    'color': 'blue',
-                    'description': 'Leavey Library description',
+                    'id': 102,
+                    'type': 'Backpack',
+                    'color': 'Blue',
+                    'date': '2022.3.28',
+                    'description': 'A blue backpack was found at Leavey Library 3rd floor',
                     'icon': 'marker'
                   }
                 }
             ]
           }
 
-          const geojson_filtered = {
-            'type': 'FeatureCollection',
-            'features': []
-          }
-          for (let i = 0; i < geojson.features.length; i++) {
-            const obj = geojson.features[i];
-            const color = geojson.features[i].properties.color;
-            console.log(color);
-            if (color == 'red') {
-              geojson_filtered.features.push(obj);
-            }
-          }
+          // for循环筛选geojson
+          // const geojson_filtered = {
+          //   'type': 'FeatureCollection',
+          //   'features': []
+          // }
+          // for (let i = 0; i < geojson.features.length; i++) {
+          //   const obj = geojson.features[i];
+          //   const color = geojson.features[i].properties.color;
+          //   console.log(color);
+          //   if (color == 'red') {
+          //     geojson_filtered.features.push(obj);
+          //   }
+          // }
           
 
           map.current.addSource('points', {
             'type': 'geojson',
-            'data': geojson_filtered
+            'data': geojson
             });
           
           map.current.addLayer({
@@ -102,8 +113,14 @@ export default function App() {
 
             new mapboxgl.Popup()
               .setLngLat(coordinates)
-              .setHTML(description)
+              .setHTML("<b>Item Description:</b> <br/>" + description)
               .addTo(map.current);
+            
+            const item = e.features[0].properties;
+            setItemColor(item.color);
+            setItemType(item.type);
+            setItemDate(item.date);
+            setItemDescription(item.description);
           })
 
           // Create a popup, but don't add it to the map yet.
@@ -117,7 +134,10 @@ export default function App() {
             map.current.getCanvas().style.cursor = 'pointer';
 
             const coordinates = e.features[0].geometry.coordinates.slice();
-            const description = e.features[0].properties.description;
+            // const description = e.features[0].properties.description;
+
+            const description = "<b>Item Color:</b> " + e.features[0].properties.color + '<br/>' + 
+                                '<b>Item Type:</b> ' + e.features[0].properties.type;
 
             // Populate the popup and set its coordinates
             // based on the feature found.
@@ -147,6 +167,11 @@ export default function App() {
           setZoom(map.current.getZoom().toFixed(2));
         });
       });
+    
+    // item detailed information
+    // useEffect(() => {
+    //   document.getElementById('itemInformation').innerHTML = itemID;
+    // }, itemID);
 
 
 
@@ -157,7 +182,40 @@ export default function App() {
             Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
           </div>
           <div ref={mapContainer} className="map-container" />
-          <FilterForm />
+          {/* <div>
+            Item Color: {itemColor} <br/>
+            Item Type: {itemType} <br/>
+            Found Date: {itemDate} <br/>
+            Item Description: {itemDescription}
+          </div> */}
+          <div align="center">
+            <table border="1" className="itemInformation">
+              {/* <tr>
+                <th>Month</th>
+                <th>Savings</th>
+              </tr> */}
+              <tr>
+                <td>Item Color</td>
+                <td>{itemColor}</td>
+              </tr>
+              <tr>
+                <td>Item Type</td>
+                <td>{itemType}</td>
+              </tr>
+              <tr>
+                <td>Found Date</td>
+                <td>{itemDate}</td>
+              </tr>
+              <tr>
+                <td>Item Description</td>
+                <td>{itemDescription}</td>
+              </tr>
+            </table>
+
+            <button className="declareButton">Declare</button>
+          </div>
+          
+          {/* <FilterForm /> */}
         </div>
       );
 }

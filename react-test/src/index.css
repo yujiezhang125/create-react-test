@@ -29,3 +29,12 @@ left: 0;
 margin: 12px;
 border-radius: 4px;
 }
+
+.itemInformation {
+  position: relative;
+  margin-top: 5px;
+}
+
+.declareButton {
+  margin-top: 5px;
+}
