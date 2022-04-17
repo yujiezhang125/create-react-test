@@ -8,6 +8,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import HomePage from './pages/Home';
 import LogInPage from './pages/LogIn';
 import MapDisplayPage from './pages/MapDisplay';
+import DeclarePage from './pages/DeclarePage';
 
 ReactDOM.render((
   <BrowserRouter>
@@ -15,6 +16,7 @@ ReactDOM.render((
         <Route path='/' element={<HomePage />} />
         <Route path='login' element={<LogInPage />} />
         <Route path='mapdisplay' element={<MapDisplayPage />} />
+        <Route path={'declarepage/:itemID'} element={<DeclarePage />} />
       </Routes>
     </BrowserRouter>
 ), document.getElementById('root'));

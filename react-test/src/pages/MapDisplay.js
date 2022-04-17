@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
 
 import mapboxgl from 'mapbox-gl'; 
 import FilterForm from './FilterForm';
@@ -12,10 +13,11 @@ export default function App() {
     const [lng, setLng] = useState(-118.2868);
     const [lat, setLat] = useState(34.0227);
     const [zoom, setZoom] = useState(14.7);
-    const [itemColor, setItemColor] = useState();
-    const [itemType, setItemType] = useState();
-    const [itemDate, setItemDate] = useState();
-    const [itemDescription, setItemDescription] = useState();
+    const [itemColor, setItemColor] = useState("N/A");
+    const [itemType, setItemType] = useState("N/A");
+    const [itemDate, setItemDate] = useState("N/A");
+    const [itemDescription, setItemDescription] = useState("N/A");
+    const [itemID, setItemID] = useState("12345");
 
     
 
@@ -212,7 +214,7 @@ export default function App() {
               </tr>
             </table>
 
-            <button className="declareButton">Declare</button>
+            <button className="declareButton"><NavLink to={{pathname: "/declarepage/" + itemID}}>  Declare  </NavLink></button>
           </div>
           
           {/* <FilterForm /> */}
