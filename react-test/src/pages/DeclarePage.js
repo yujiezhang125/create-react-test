@@ -1,8 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
-// import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
-// import { getDatabase, ref, onValue} from "firebase/database";
 import { getDatabase, ref, child, get } from "firebase/database";
 
 const firebaseConfig = {

@@ -4,10 +4,93 @@ import { NavLink, Link } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl'; 
 import FilterForm from './FilterForm';
 
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, child, get } from "firebase/database";
+
+
+// mapbox token
 mapboxgl.accessToken = 'pk.eyJ1IjoieXVqaWV6aGFuZzEyNSIsImEiOiJja3Ztb2I4bDMzNHV4MnVxZnFhNG5sZDIyIn0.8MKp_jRj8QSo5B_uMmbMZg';
+// firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyADhROQjGTctSTnuN0Q3XeapJ39K46ZFMk",
+  authDomain: "lostandfound-e9912.firebaseapp.com",
+  databaseURL: "https://lostandfound-e9912-default-rtdb.firebaseio.com",
+  projectId: "lostandfound-e9912",
+  storageBucket: "lostandfound-e9912.appspot.com",
+  messagingSenderId: "971455276252",
+  appId: "1:971455276252:web:0c65479f9b70e22f67c019"
+};
+// initialize
+const app = initializeApp(firebaseConfig);
 
 
 export default function App() {
+
+  // read database
+  const dbRef = ref(getDatabase());
+  get(child(dbRef, `Found_items/`)).then((snapshot) => {
+    console.log(snapshot.val());
+    const foundItems = snapshot.val();
+
+    var foundItemsJson = {
+      'type': 'FeatureCollection',
+      'features': [
+        // {
+        // 'type': 'Feature',
+        // 'geometry': {
+        //   'type': 'Point',
+        //   'coordinates': [-118.28950976870416,  34.02067638715009]
+        //   },
+        //   'properties': {
+        //     'id': 101,
+        //     'type': 'Key',
+        //     'color': 'Red',
+        //     'date': '2022.3.15',
+        //     'description': 'A red key was found at Olin Hall, classroom 134',
+        //     'icon': 'marker'
+        //   }
+        // }
+      ]
+    }
+
+    var feature = {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-118.28950976870416,  34.02067638715009]
+      },
+      'properties': {
+        'id': 101,
+        'type': 'Key',
+        'color': 'Red',
+        'date': '2022.3.15',
+        'description': 'A red key was found at Olin Hall, classroom 134',
+        'icon': 'marker'
+      }
+    }
+    Object.keys(foundItems).forEach(function(key) {
+      console.log(key, foundItems[key]);
+      const itemInfo = foundItems[key];
+      
+      feature.geometry.coordinates[0] = itemInfo.location.Longitude;
+      feature.geometry.coordinates[1] = itemInfo.location.Latitude;
+      
+      feature.properties.id = key;
+      feature.properties.type = itemInfo.item_name;
+      feature.properties.color = itemInfo.color;
+      feature.properties.date = itemInfo.date;
+      feature.properties.dexcription = itemInfo.description;
+
+      foundItemsJson.features.push(feature);
+    })
+
+    console.log(foundItemsJson);
+  });
+
+  // console.log(foundItemsJson);
+
+
+
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [lng, setLng] = useState(-118.2868);
