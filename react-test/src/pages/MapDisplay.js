@@ -24,32 +24,45 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export default function App() {
-  // read database
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const [lng, setLng] = useState(-118.2868);
+  const [lat, setLat] = useState(34.0227);
+  const [zoom, setZoom] = useState(14.7);
+  const [itemColor, setItemColor] = useState("N/A");
+  const [itemType, setItemType] = useState("N/A");
+  const [itemDate, setItemDate] = useState("N/A");
+  const [itemDescription, setItemDescription] = useState("N/A");
+  const [itemID, setItemID] = useState('0bfac146-1084-4001-8fe6-d5109eb1e2fe');
+
+  // add points end
+  useEffect(() => {
+    // read database
   const dbRef = ref(getDatabase());
+  var foundItemsJson = {
+    type: "FeatureCollection",
+    features: [
+      // {
+      // 'type': 'Feature',
+      // 'geometry': {
+      //   'type': 'Point',
+      //   'coordinates': [-118.28950976870416,  34.02067638715009]
+      //   },
+      //   'properties': {
+      //     'id': 101,
+      //     'type': 'Key',
+      //     'color': 'Red',
+      //     'date': '2022.3.15',
+      //     'description': 'A red key was found at Olin Hall, classroom 134',
+      //     'icon': 'marker'
+      //   }
+      // }
+    ],
+  };
+
   get(child(dbRef, `Found_items/`)).then((snapshot) => {
     // console.log(snapshot.val());
     const foundItems = snapshot.val();
-
-    var foundItemsJson = {
-      type: "FeatureCollection",
-      features: [
-        // {
-        // 'type': 'Feature',
-        // 'geometry': {
-        //   'type': 'Point',
-        //   'coordinates': [-118.28950976870416,  34.02067638715009]
-        //   },
-        //   'properties': {
-        //     'id': 101,
-        //     'type': 'Key',
-        //     'color': 'Red',
-        //     'date': '2022.3.15',
-        //     'description': 'A red key was found at Olin Hall, classroom 134',
-        //     'icon': 'marker'
-        //   }
-        // }
-      ],
-    };
 
     var feature = {
       type: "Feature",
@@ -67,7 +80,7 @@ export default function App() {
       },
     };
     Object.keys(foundItems).forEach(function (key) {
-      console.log(key, foundItems[key]);
+      // console.log(key, foundItems[key]);
       const itemInfo = foundItems[key];
 
       feature.geometry.coordinates[0] = itemInfo.location.Longitude;
@@ -79,25 +92,13 @@ export default function App() {
       feature.properties.date = itemInfo.date;
       feature.properties.dexcription = itemInfo.description;
 
-      foundItemsJson.features.push(feature);
+      console.log(itemInfo.color, itemInfo.item_name, itemInfo.location.Longitude, itemInfo.location.Latitude)
+      foundItemsJson.features.push(JSON.parse(JSON.stringify(feature)));
     });
 
     console.log(foundItemsJson);
   });
 
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-  const [lng, setLng] = useState(-118.2868);
-  const [lat, setLat] = useState(34.0227);
-  const [zoom, setZoom] = useState(14.7);
-  const [itemColor, setItemColor] = useState("N/A");
-  const [itemType, setItemType] = useState("N/A");
-  const [itemDate, setItemDate] = useState("N/A");
-  const [itemDescription, setItemDescription] = useState("N/A");
-  const [itemID, setItemID] = useState("12345");
-
-  // add points end
-  useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -109,60 +110,10 @@ export default function App() {
     // add points
     map.current.on("load", () => {
       // Add the points data as a source.
-      const geojson = {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [-118.28950976870416, 34.02067638715009],
-            },
-            properties: {
-              id: 101,
-              type: "Key",
-              color: "Red",
-              date: "2022.3.15",
-              description: "A red key was found at Olin Hall, classroom 134",
-              icon: "marker",
-            },
-          },
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [-118.28290498660579, 34.02176003995943],
-            },
-            properties: {
-              id: 102,
-              type: "Backpack",
-              color: "Blue",
-              date: "2022.3.28",
-              description:
-                "A blue backpack was found at Leavey Library 3rd floor",
-              icon: "marker",
-            },
-          },
-        ],
-      };
-
-      // for循环筛选geojson
-      // const geojson_filtered = {
-      //   'type': 'FeatureCollection',
-      //   'features': []
-      // }
-      // for (let i = 0; i < geojson.features.length; i++) {
-      //   const obj = geojson.features[i];
-      //   const color = geojson.features[i].properties.color;
-      //   console.log(color);
-      //   if (color == 'red') {
-      //     geojson_filtered.features.push(obj);
-      //   }
-      // }
-
+      // console.log(foundItemsJson);
       map.current.addSource("points", {
         type: "geojson",
-        data: geojson,
+        data: foundItemsJson,
       });
 
       map.current.addLayer({
@@ -198,6 +149,7 @@ export default function App() {
         setItemType(item.type);
         setItemDate(item.date);
         setItemDescription(item.description);
+        setItemID(item.id);
       });
 
       // Create a popup, but don't add it to the map yet.
@@ -233,11 +185,13 @@ export default function App() {
     });
 
     // 点击事件获取经纬度
-    map.current.on("click", function (e) {
-      console.log(e.point);
-      console.log(e.lngLat);
-    });
+    // map.current.on("click", function (e) {
+    //   console.log(e.point);
+    //   console.log(e.lngLat);
+    // });
   });
+
+  
 
   useEffect(() => {
     if (!map.current) return; // wait for map to initialize
@@ -248,10 +202,169 @@ export default function App() {
     });
   });
 
-  // item detailed information
+  // const mapContainer = useRef(null);
+  // const map = useRef(null);
+  // const [lng, setLng] = useState(-118.2868);
+  // const [lat, setLat] = useState(34.0227);
+  // const [zoom, setZoom] = useState(14.7);
+  // const [itemColor, setItemColor] = useState("N/A");
+  // const [itemType, setItemType] = useState("N/A");
+  // const [itemDate, setItemDate] = useState("N/A");
+  // const [itemDescription, setItemDescription] = useState("N/A");
+  // const [itemID, setItemID] = useState("12345");
+
+  // // add points end
   // useEffect(() => {
-  //   document.getElementById('itemInformation').innerHTML = itemID;
-  // }, itemID);
+  //   if (map.current) return; // initialize map only once
+  //   map.current = new mapboxgl.Map({
+  //     container: mapContainer.current,
+  //     style: "mapbox://styles/mapbox/streets-v11",
+  //     center: [lng, lat],
+  //     zoom: zoom,
+  //   });
+
+  //   // add points
+  //   map.current.on("load", () => {
+  //     // Add the points data as a source.
+  //     const geojson = {
+  //       type: "FeatureCollection",
+  //       features: [
+  //         {
+  //           type: "Feature",
+  //           geometry: {
+  //             type: "Point",
+  //             coordinates: [-118.28950976870416, 34.02067638715009],
+  //           },
+  //           properties: {
+  //             id: 101,
+  //             type: "Key",
+  //             color: "Red",
+  //             date: "2022.3.15",
+  //             description: "A red key was found at Olin Hall, classroom 134",
+  //             icon: "marker",
+  //           },
+  //         },
+  //         {
+  //           type: "Feature",
+  //           geometry: {
+  //             type: "Point",
+  //             coordinates: [-118.28290498660579, 34.02176003995943],
+  //           },
+  //           properties: {
+  //             id: 102,
+  //             type: "Backpack",
+  //             color: "Blue",
+  //             date: "2022.3.28",
+  //             description:
+  //               "A blue backpack was found at Leavey Library 3rd floor",
+  //             icon: "marker",
+  //           },
+  //         },
+  //       ],
+  //     };
+
+  //     // for循环筛选geojson
+  //     // const geojson_filtered = {
+  //     //   'type': 'FeatureCollection',
+  //     //   'features': []
+  //     // }
+  //     // for (let i = 0; i < geojson.features.length; i++) {
+  //     //   const obj = geojson.features[i];
+  //     //   const color = geojson.features[i].properties.color;
+  //     //   console.log(color);
+  //     //   if (color == 'red') {
+  //     //     geojson_filtered.features.push(obj);
+  //     //   }
+  //     // }
+
+  //     map.current.addSource("points", {
+  //       type: "geojson",
+  //       data: geojson,
+  //     });
+
+  //     map.current.addLayer({
+  //       id: "testLayer",
+  //       source: "points",
+  //       type: "circle",
+  //       paint: {
+  //         // "circle-color": "#FF0000",
+  //         // "circle-radius": 10,
+  //         "circle-color": "#4264fb",
+  //         "circle-radius": 8,
+  //         "circle-stroke-width": 2,
+  //         "circle-stroke-color": "#ffffff",
+  //       },
+  //       // "type": "symbol",
+  //       // 'layout': {
+  //       //   'icon-image': '{icon}',
+  //       //   'icon-allow-overlap': true
+  //       //   }
+  //     });
+
+  //     map.current.on("click", "testLayer", function (e) {
+  //       const coordinates = e.features[0].geometry.coordinates.slice();
+  //       const description = e.features[0].properties.description;
+
+  //       new mapboxgl.Popup()
+  //         .setLngLat(coordinates)
+  //         .setHTML("<b>Item Description:</b> <br/>" + description)
+  //         .addTo(map.current);
+
+  //       const item = e.features[0].properties;
+  //       setItemColor(item.color);
+  //       setItemType(item.type);
+  //       setItemDate(item.date);
+  //       setItemDescription(item.description);
+  //     });
+
+  //     // Create a popup, but don't add it to the map yet.
+  //     const popup = new mapboxgl.Popup({
+  //       closeButton: false,
+  //       closeOnClick: false,
+  //     });
+
+  //     // Change the cursor to a pointer when the mouse is over the places layer.
+  //     map.current.on("mouseenter", "testLayer", (e) => {
+  //       map.current.getCanvas().style.cursor = "pointer";
+
+  //       const coordinates = e.features[0].geometry.coordinates.slice();
+  //       // const description = e.features[0].properties.description;
+
+  //       const description =
+  //         "<b>Item Color:</b> " +
+  //         e.features[0].properties.color +
+  //         "<br/>" +
+  //         "<b>Item Type:</b> " +
+  //         e.features[0].properties.type;
+
+  //       // Populate the popup and set its coordinates
+  //       // based on the feature found.
+  //       popup.setLngLat(coordinates).setHTML(description).addTo(map.current);
+  //     });
+
+  //     // Change it back to a pointer when it leaves.
+  //     map.current.on("mouseleave", "testLayer", () => {
+  //       map.current.getCanvas().style.cursor = "";
+  //       popup.remove();
+  //     });
+  //   });
+
+  //   // 点击事件获取经纬度
+  //   // map.current.on("click", function (e) {
+  //   //   console.log(e.point);
+  //   //   console.log(e.lngLat);
+  //   // });
+  // });
+
+  // useEffect(() => {
+  //   if (!map.current) return; // wait for map to initialize
+  //   map.current.on("move", () => {
+  //     setLng(map.current.getCenter().lng.toFixed(4));
+  //     setLat(map.current.getCenter().lat.toFixed(4));
+  //     setZoom(map.current.getZoom().toFixed(2));
+  //   });
+  // });
+
 
   return (
     <div>
