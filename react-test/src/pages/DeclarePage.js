@@ -1,7 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
+// import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
+// import { getDatabase, ref, onValue} from "firebase/database";
+import { getDatabase, ref, child, get } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyADhROQjGTctSTnuN0Q3XeapJ39K46ZFMk",
@@ -15,7 +17,7 @@ const firebaseConfig = {
 
 // initialize
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// const db = getFirestore(app);
  
 // class DeclarePage extends React.Component {
 
@@ -32,36 +34,16 @@ const db = getFirestore(app);
 
 function DeclarePage(props) {
   // read database
-  async function getCities(db) {
-    const citiesCol = collection(db, 'users');
-    console.log('citiesCol')
-    const citySnapshot = await getDocs(citiesCol);
-    const cityList = citySnapshot.docs.map(doc => doc.data());
-    console.log('test function');
-    console.log(cityList);
-    return cityList;
-  }
+  const itemID = '0bfac146-1084-4001-8fe6-d5109eb1e2fe';
+  const dbRef = ref(getDatabase());
+  get(child(dbRef, `Found_items/${itemID}`)).then((snapshot) => {
+    console.log(snapshot.val());
 
-  getCities(db).then(function (result){
-    console.log(result);
+    const userID = snapshot.val().report_user;
+    get(child(dbRef, `Users/${userID}`)).then((snapshot) => {
+      console.log(snapshot.val());
+    });
   });
-
-  // var dbRefObject = firebase.database().ref("Users/" + "person3");
-  //   dbRefObject.on("value", (snapshot) => {
-  //       const existuser = snapshot.val();
-  //       console.log(existuser);
-  //       // if (existuser == null){
-  //       //     alert("This account is not existed, you can create an account fristly.");
-  //       //     return false;
-  //       // }else{
-  //       //     const exist_password = existuser["password"]
-  //       //     console.log(exist_password);
-  //       //     if (exist_password != password){
-  //       //         alert("Your password is incorrect");
-  //       //         return false;
-  //       //     }
-  //       // }
-  //   });
 
 
   // console.log(this.props.match.params.id);
